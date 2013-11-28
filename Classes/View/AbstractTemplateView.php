@@ -109,7 +109,17 @@ abstract class Tx_Fluid_View_AbstractTemplateView implements Tx_Extbase_MVC_View
 	 */
 	public function injectTemplateCompiler(Tx_Fluid_Core_Compiler_TemplateCompiler $templateCompiler) {
 		$this->templateCompiler = $templateCompiler;
-		$this->templateCompiler->setTemplateCache($GLOBALS['typo3CacheManager']->getCache('fluid_template'));
+		t3lib_cache::initializeCachingFramework();
+		try {
+			$templateCache = $GLOBALS['typo3CacheManager']->getCache('fluid_template');
+		} catch (t3lib_cache_exception_NoSuchCache $exception) {
+			$templateCache = $GLOBALS['typo3CacheFactory']->create(
+				'fluid_template',
+				$GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']['fluid_template']['frontend'],
+				$GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']['fluid_template']['backend']
+			);
+		}
+		$this->templateCompiler->setTemplateCache($templateCache);
 	}
 
 	/**

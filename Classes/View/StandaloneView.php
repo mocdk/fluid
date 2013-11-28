@@ -93,7 +93,16 @@ class Tx_Fluid_View_StandaloneView extends Tx_Fluid_View_AbstractTemplateView {
 		$this->setControllerContext($controllerContext);
 
 		$this->templateCompiler = $this->objectManager->get('Tx_Fluid_Core_Compiler_TemplateCompiler'); // singleton
-		$this->templateCompiler->setTemplateCache($GLOBALS['typo3CacheManager']->getCache('fluid_template'));
+		try {
+			$templateCache = $GLOBALS['typo3CacheManager']->getCache('fluid_template');
+		} catch (t3lib_cache_exception_NoSuchCache $exception) {
+			$templateCache = $GLOBALS['typo3CacheFactory']->create(
+				'fluid_template',
+				$GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']['fluid_template']['frontend'],
+				$GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']['fluid_template']['backend']
+			);
+		}
+		$this->templateCompiler->setTemplateCache($templateCache);
 	}
 
 	/**
